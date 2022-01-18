@@ -1,42 +1,43 @@
-#![feature(proc_macro_hygiene, decl_macro)]
-#[macro_use] extern crate rocket;
+use actix_web::{get, post, http, web, App, HttpRequest, HttpResponse, HttpServer, Responder, Error};
+use actix_web::http::header;
+use json::JsonValue;
+use serde::{Deserialize, Serialize};
 
-extern crate redis;
+#[derive(Deserialize)]
+pub struct UrlJson {
+    url: String,
+}
 
-use std::io::Read;
-use std::net::SocketAddr;
-use rocket::http::Status;
-use rocket::{Data, Outcome, Request, request};
-use rocket::response::{content, status};
-use redis::Commands;
-use rocket::request::FromRequest;
-use url::{Url, ParseError};
+#[post("/set")]
+async fn set(req: HttpRequest, item: web::Json<UrlJson>) -> HttpResponse {
+    println!("{:?}", req.peer_addr().unwrap());
+    println!("{:?}", item.url);
 
+    HttpResponse::Ok()
+        .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+        .body(format!("{:?}", req.peer_addr().unwrap()))
+}
 
-// BEWARE: this is like the second thing i've ever written in rust so its horrible.
 
 #[get("/get")]
-fn get(remote_addr: SocketAddr) -> String {
-    let url = "https://google.com".to_string();
-    println!("{}", &remote_addr);
+async fn get(req: HttpRequest) -> HttpResponse {
+    println!("{:?}", req.peer_addr().unwrap());
 
-    // let client = redis::Client::open("redis://127.0.0.1/")?;
-
-    format!("{}, {}", remote_addr, url)
+    HttpResponse::Ok()
+        .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+        .body(format!("{:?}", req.peer_addr().unwrap()))
 }
 
-#[post("/set", data = "<url>")]
-fn set(url: Data, remote_addr: SocketAddr) -> String {
-    let mut stream = url.open();
-    let mut buffer = String::new();
-    stream.read_to_string(&mut buffer).unwrap();
-    let url = Url::parse(&buffer).unwrap();
-    println!("{}", url);
-    println!("{}", remote_addr);
-    buffer
-}
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        App::new()
+            .service(get)
+            .service(set)
+    })
+        .bind(("127.0.0.1", 8080))?
+        .run()
+        .await;
 
-
-fn main() {
-    rocket::ignite().mount("/", routes![get, set]).launch();
+    Ok(())
 }
