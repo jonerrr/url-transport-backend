@@ -51,7 +51,7 @@ server.get<{}>("/get", async (req, res) => {
   res.code(200).send({ url });
 });
 
-server.listen(8080, async (err, address) => {
+server.listen(8080, "0.0.0.0", async (err, address) => {
   if (err) console.error(err);
 
   await client.connect();
