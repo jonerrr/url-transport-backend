@@ -13,6 +13,12 @@ server.register(cors);
 interface SetBody {
   url: string;
 }
+interface IpHeaders {
+  "x-forwarded-for"?: string;
+  "x-real-ip"?: string;
+  "x-forwarded-proto"?: string;
+  "x-forwarded-port"?: string;
+}
 
 const opts: RouteShorthandOptions = {
   schema: {
@@ -24,18 +30,34 @@ const opts: RouteShorthandOptions = {
         },
       },
     },
+    headers: {
+      type: "object",
+      properties: {
+        "x-real-ip": {
+          type: "string",
+        },
+      },
+    },
   },
 };
 
 server.post<{
   Body: SetBody;
+  Headers: IpHeaders;
 }>("/set", opts, async (req, res) => {
   console.log(req.body);
   if (!req.body.url.match(urlRegex({ exact: true }))) {
     res.code(400).send({ error: "Invalid URL" });
   }
-  console.log(req.body.url);
-  await client.set(req.ip, req.body.url);
+
+  console.log(req.headers["x-real-ip"]);
+  if (!req.headers["x-real-ip"])
+    return res.code(400).send({ error: "Invalid IP" });
+
+  await client.set(
+    req.headers["x-real-ip"],
+    req.body.url.startsWith("http") ? req.body.url : "https://" + req.body.url
+  );
 
   res.code(200).send({ message: "ok" });
 });
