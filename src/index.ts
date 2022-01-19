@@ -62,8 +62,11 @@ server.post<{
   res.code(200).send({ message: "ok" });
 });
 
-server.get<{}>("/get", async (req, res) => {
-  const url = await client.get(req.ip);
+server.get<{ Headers: IpHeaders }>("/get", async (req, res) => {
+  if (!req.headers["x-real-ip"])
+    return res.code(400).send({ error: "Invalid IP" });
+
+  const url = await client.get(req.headers["x-real-ip"]);
   console.log(url, typeof url);
 
   if (!url) {
