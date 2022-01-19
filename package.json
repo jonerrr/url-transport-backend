@@ -1,0 +1,33 @@
+{
+  "name": "url-transport-backend",
+  "version": "1.0.0",
+  "description": "Move your urls from anywhere on your network with ease!",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node-dev src/index.ts",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonerrr/url-transport-backend.git"
+  },
+  "author": "jonah",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jonerrr/url-transport-backend/issues"
+  },
+  "homepage": "https://github.com/jonerrr/url-transport-backend#readme",
+  "dependencies": {
+    "@types/node": "^17.0.10",
+    "@types/url-regex-safe": "^1.0.0",
+    "fastify": "^3.26.0",
+    "fastify-cors": "^6.0.2",
+    "http": "^0.0.1-security",
+    "prettier": "^2.5.1",
+    "re2": "^1.17.3",
+    "redis": "^4.0.2",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.5.4",
+    "url-regex-safe": "^3.0.0"
+  }
+}
